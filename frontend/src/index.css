@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Manrope', system-ui, sans-serif;
+    color: #ecf7f3;
+    background:
+      radial-gradient(circle at top left, rgba(21, 163, 122, 0.22), transparent 32%),
+      radial-gradient(circle at 80% 0%, rgba(245, 165, 36, 0.12), transparent 28%),
+      linear-gradient(180deg, #03111b 0%, #071421 48%, #091423 100%);
+    background-attachment: fixed;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-3xl border border-white/10 bg-white/5 shadow-panel backdrop-blur-xl;
+  }
+
+  .section-title {
+    @apply text-xs font-semibold uppercase tracking-[0.3em] text-brand-200;
+  }
+
+  .display-heading {
+    @apply font-display text-4xl font-semibold tracking-tight text-white md:text-5xl;
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:border-brand-200 focus:ring-2 focus:ring-brand-500/20;
+  }
+
+  .primary-button {
+    @apply inline-flex items-center justify-center rounded-2xl bg-brand-500 px-5 py-3 font-semibold text-slate-950 transition hover:translate-y-[-1px] hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10;
+  }
+}
