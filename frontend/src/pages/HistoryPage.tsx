@@ -4,90 +4,502 @@ import { Link } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { api } from '../lib/api';
 
+
+
 type HistoryItem = {
-  id: number;
-  file_name: string;
-  target_role: string | null;
-  ats_score: number;
-  keyword_score: number;
-  created_at: string;
+
+id:number;
+
+file_name:string;
+
+target_role:string | null;
+
+ats_score:number;
+
+keyword_score:number;
+
+created_at:string;
+
 };
 
-export function HistoryPage() {
-  const [items, setItems] = useState<HistoryItem[]>([]);
-  const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_email');
-    window.location.href = '/login';
-  };
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchHistory = async () => {
-      try {
-        const response = await api.get('/analysis-history', { params: query ? { q: query } : undefined });
-        if (isMounted) {
-          setItems(response.data.items);
-        }
-      } catch (fetchError) {
-        if (isMounted) {
-          setError('Unable to load previous analyses.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
 
-    setIsLoading(true);
-    void fetchHistory();
-    return () => {
-      isMounted = false;
-    };
-  }, [query]);
 
-  return (
-    <main className="mx-auto grid min-h-screen max-w-7xl gap-6 p-4 md:p-6 lg:grid-cols-[280px_1fr]">
-      <Sidebar onLogout={handleLogout} />
-      <section className="grid gap-6">
-        <header className="glass-panel p-6 md:p-8">
-          <p className="section-title">History</p>
-          <h1 className="mt-4 font-display text-4xl font-semibold text-white">Previous analyses</h1>
-          <p className="mt-4 max-w-3xl text-slate-300">
-            Search, filter, and revisit earlier ATS scans to compare changes over time.
-          </p>
+export function HistoryPage(){
 
-          <div className="mt-6 max-w-xl">
-            <input className="field" placeholder="Search by role or file name" value={query} onChange={(event) => setQuery(event.target.value)} />
-          </div>
-        </header>
 
-        {isLoading ? <p className="text-sm text-slate-300">Loading history...</p> : null}
-        {error ? <p className="text-sm text-red-300">{error}</p> : null}
+const [items,setItems] = useState<HistoryItem[]>([]);
 
-        <div className="grid gap-4">
-          {items.map((item) => (
-            <Link key={item.id} className="glass-panel flex flex-col gap-4 p-6 transition hover:border-brand-200/30 hover:bg-white/10 md:flex-row md:items-center md:justify-between" to={`/analysis/${item.id}`}>
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-brand-200">{item.target_role || 'Target role not set'}</p>
-                <h2 className="mt-2 text-xl font-semibold text-white">{item.file_name}</h2>
-                <p className="mt-2 text-sm text-slate-300">Scored on {new Date(item.created_at).toLocaleString()}</p>
-              </div>
+const [query,setQuery] = useState('');
 
-              <div className="flex gap-3">
-                <span className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">ATS {item.ats_score}</span>
-                <span className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">Keywords {item.keyword_score}%</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-    </main>
-  );
+const [loading,setLoading] = useState(true);
+
+const [error,setError] = useState('');
+
+
+
+
+
+const logout = ()=>{
+
+
+localStorage.clear();
+
+window.location.href='/login';
+
+
+};
+
+
+
+
+
+
+
+
+useEffect(()=>{
+
+
+async function loadHistory(){
+
+
+try{
+
+
+const res = await api.get(
+
+'/analysis-history',
+
+{
+
+params:
+
+query
+
+?
+
+{
+
+q:query
+
+}
+
+:
+
+undefined
+
+}
+
+);
+
+
+setItems(
+res.data.items
+);
+
+
+
+}
+
+catch{
+
+
+setError(
+'Unable to load history'
+);
+
+
+}
+
+
+finally{
+
+
+setLoading(false);
+
+
+}
+
+
+
+}
+
+
+
+setLoading(true);
+
+loadHistory();
+
+
+
+},[query]);
+
+
+
+
+
+
+
+
+
+return (
+
+<main className="
+min-h-screen
+bg-black
+text-white
+grid
+lg:grid-cols-[280px_1fr]
+gap-6
+p-6
+">
+
+
+
+<Sidebar onLogout={logout}/>
+
+
+
+
+
+<section className="
+space-y-6
+">
+
+
+
+
+
+<header className="
+border
+border-[#262626]
+bg-[#0d0d0d]
+p-8
+">
+
+
+
+<p className="
+text-xs
+tracking-[2px]
+text-gray-500
+uppercase
+">
+
+ANALYSIS ARCHIVE
+
+</p>
+
+
+
+
+<h1 className="
+text-5xl
+font-bold
+uppercase
+mt-5
+">
+
+PREVIOUS SCANS
+
+</h1>
+
+
+
+
+<div className="
+mt-6
+h-[3px]
+w-20
+bg-gradient-to-r
+from-blue-600
+to-red-600
+"/>
+
+
+
+
+
+<p className="
+mt-6
+text-gray-400
+max-w-2xl
+">
+
+Review previous resume intelligence reports and compare ATS improvements.
+
+</p>
+
+
+
+
+
+<input
+
+className="
+field
+mt-8
+max-w-xl
+"
+
+placeholder="SEARCH ROLE OR FILE"
+
+value={query}
+
+onChange={
+e=>setQuery(e.target.value)
+}
+
+/>
+
+
+
+</header>
+
+
+
+
+
+
+
+
+{
+loading &&
+
+<p className="text-gray-400">
+
+Loading history...
+
+</p>
+
+}
+
+
+
+
+
+{
+error &&
+
+<p className="text-red-400">
+
+{error}
+
+</p>
+
+}
+
+
+
+
+
+
+
+
+<div className="
+grid
+gap-5
+">
+
+
+
+
+
+{
+
+items.map(item=>(
+
+
+
+<Link
+
+key={item.id}
+
+to={`/analysis/${item.id}`}
+
+className="
+border
+border-[#262626]
+bg-[#0d0d0d]
+p-6
+grid
+gap-6
+md:grid-cols-[1fr_auto]
+hover:border-white
+transition
+"
+
+
+>
+
+
+
+
+
+
+<div>
+
+
+<p className="
+text-xs
+tracking-[2px]
+text-gray-500
+uppercase
+">
+
+{
+item.target_role ||
+'NO ROLE'
+}
+
+</p>
+
+
+
+
+<h2 className="
+text-2xl
+font-bold
+uppercase
+mt-3
+">
+
+{item.file_name}
+
+</h2>
+
+
+
+
+<p className="
+mt-3
+text-gray-500
+text-sm
+">
+
+{new Date(item.created_at).toLocaleString()}
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div className="
+flex
+gap-4
+">
+
+
+<div className="
+border
+border-[#262626]
+px-6
+py-4
+text-center
+">
+
+
+<p className="
+text-xs
+text-gray-500
+tracking-widest
+">
+
+ATS
+
+</p>
+
+
+<p className="
+text-3xl
+font-bold
+mt-2
+">
+
+{item.ats_score}
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+<div className="
+border
+border-[#262626]
+px-6
+py-4
+text-center
+">
+
+
+<p className="
+text-xs
+text-gray-500
+tracking-widest
+">
+
+KEYWORDS
+
+</p>
+
+
+<p className="
+text-3xl
+font-bold
+mt-2
+">
+
+{item.keyword_score}%
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+</Link>
+
+
+
+))
+
+}
+
+
+
+</div>
+
+
+
+
+
+</section>
+
+
+</main>
+
+
+);
+
 }

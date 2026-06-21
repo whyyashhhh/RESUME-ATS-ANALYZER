@@ -1,19 +1,47 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { ProtectedRoute } from './components/ProtectedRoute';
+
 import { DashboardPage } from './pages/DashboardPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { AnalysisResultsPage } from './pages/AnalysisResultsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 
+
+
+
 export default function App() {
+
   const hasToken = Boolean(localStorage.getItem('access_token'));
 
   return (
+
     <Routes>
-      <Route path="/" element={<Navigate to={hasToken ? '/dashboard' : '/login'} replace />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={hasToken ? '/dashboard' : '/login'}
+            replace
+          />
+        }
+      />
+
+
+      <Route
+        path="/login"
+        element={<LoginPage />}
+      />
+
+
+      <Route
+        path="/register"
+        element={<RegisterPage />}
+      />
+
+
       <Route
         path="/dashboard"
         element={
@@ -22,6 +50,8 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/analysis/:id"
         element={
@@ -30,6 +60,8 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/history"
         element={
@@ -38,7 +70,22 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to={hasToken ? '/dashboard' : '/login'} replace />} />
+
+
+      
+
+
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={hasToken ? '/dashboard' : '/login'}
+            replace
+          />
+        }
+      />
+
     </Routes>
+
   );
 }

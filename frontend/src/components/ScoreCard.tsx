@@ -5,18 +5,83 @@ type ScoreCardProps = {
   tone?: 'brand' | 'accent' | 'slate';
 };
 
-const toneStyles = {
-  brand: 'from-brand-500/30 to-brand-700/10',
-  accent: 'from-accent-500/30 to-accent-700/10',
-  slate: 'from-white/10 to-white/5',
-} as const;
 
-export function ScoreCard({ title, value, subtitle, tone = 'brand' }: ScoreCardProps) {
-  return (
-    <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${toneStyles[tone]} p-5 shadow-panel backdrop-blur-xl`}>
-      <p className="text-xs uppercase tracking-[0.28em] text-slate-300">{title}</p>
-      <div className="mt-3 text-4xl font-semibold text-white">{value}</div>
-      {subtitle ? <p className="mt-3 text-sm leading-6 text-slate-300">{subtitle}</p> : null}
-    </div>
-  );
+export function ScoreCard({
+  title,
+  value,
+  subtitle,
+}: ScoreCardProps) {
+
+
+return (
+
+<div
+className="
+border
+border-[#262626]
+bg-[#0d0d0d]
+p-6
+transition
+hover:border-white
+"
+>
+
+
+<p
+className="
+text-xs
+uppercase
+tracking-[2px]
+text-gray-500
+"
+>
+
+{title}
+
+</p>
+
+
+
+<div
+className="
+mt-5
+text-5xl
+font-bold
+text-white
+"
+>
+
+{value}
+
+</div>
+
+
+
+
+{
+subtitle &&
+
+<p
+className="
+mt-4
+text-sm
+leading-6
+text-gray-400
+"
+>
+
+{subtitle}
+
+</p>
+
+}
+
+
+
+</div>
+
+
+);
+
+
 }

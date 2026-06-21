@@ -3,57 +3,364 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { api } from '../lib/api';
 
-export function RegisterPage() {
-  const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+export function RegisterPage() {
+
+
+  const navigate = useNavigate();
+
+
+  const [name,setName] = useState('');
+
+  const [email,setEmail] = useState('');
+
+  const [password,setPassword] = useState('');
+
+  const [error,setError] = useState('');
+
+  const [loading,setLoading] = useState(false);
+
+
+
+
+  const handleSubmit = async(
+    event:React.FormEvent<HTMLFormElement>
+  )=>{
+
+
     event.preventDefault();
+
     setError('');
-    setIsLoading(true);
-    try {
-      const response = await api.post('/register', { name, email, password });
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('user_name', response.data.user.name);
-      localStorage.setItem('user_email', response.data.user.email);
+
+    setLoading(true);
+
+
+
+    try{
+
+
+      const response = await api.post(
+
+        '/register',
+
+        {
+          name,
+          email,
+          password
+        }
+
+      );
+
+
+
+      localStorage.setItem(
+        'access_token',
+        response.data.access_token
+      );
+
+
+      localStorage.setItem(
+        'user_name',
+        response.data.user.name
+      );
+
+
+      localStorage.setItem(
+        'user_email',
+        response.data.user.email
+      );
+
+
+
       navigate('/dashboard');
-    } catch (submitError) {
-      setError('Unable to create the account. Check the form and try again.');
-    } finally {
-      setIsLoading(false);
+
+
+
     }
+
+    catch{
+
+
+      setError(
+        'ACCOUNT CREATION FAILED'
+      );
+
+
+    }
+
+
+    finally{
+
+      setLoading(false);
+
+    }
+
+
   };
 
-  return (
-    <main className="grid min-h-screen place-items-center px-4 py-12">
-      <section className="glass-panel w-full max-w-md p-8 md:p-10">
-        <p className="section-title">Create account</p>
-        <h1 className="mt-4 font-display text-4xl font-semibold text-white">Register</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-300">
-          Set up an account to upload resumes, run ATS scoring, and save analysis history.
-        </p>
 
-        <form className="mt-8 grid gap-4" onSubmit={handleSubmit}>
-          <input className="field" placeholder="Name" value={name} onChange={(event) => setName(event.target.value)} />
-          <input className="field" placeholder="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-          <input className="field" placeholder="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          {error ? <p className="text-sm text-red-300">{error}</p> : null}
-          <button className="primary-button" disabled={isLoading} type="submit">
-            {isLoading ? 'Creating account...' : 'Register'}
-          </button>
-        </form>
 
-        <p className="mt-6 text-sm text-slate-300">
-          Already have an account?{' '}
-          <Link className="font-semibold text-brand-100 hover:text-brand-50" to="/login">
-            Sign in
-          </Link>
-        </p>
-      </section>
-    </main>
-  );
+
+
+
+return (
+
+<main className="
+min-h-screen
+bg-black
+flex
+items-center
+justify-center
+p-6
+">
+
+
+
+<section className="
+w-full
+max-w-md
+bg-[#0d0d0d]
+border
+border-[#262626]
+p-10
+">
+
+
+
+<p className="
+text-xs
+tracking-[2px]
+text-gray-500
+uppercase
+">
+
+AI RESUME SYSTEM
+
+</p>
+
+
+
+
+<h1 className="
+mt-6
+text-5xl
+font-bold
+uppercase
+">
+
+CREATE ACCOUNT
+
+</h1>
+
+
+
+
+<div className="
+mt-5
+h-[3px]
+w-20
+bg-gradient-to-r
+from-blue-600
+via-blue-400
+to-red-600
+"/>
+
+
+
+
+
+
+<p className="
+mt-6
+text-gray-400
+text-sm
+leading-6
+">
+
+Create your profile and start optimizing resumes with AI.
+
+</p>
+
+
+
+
+
+
+
+<form
+
+onSubmit={handleSubmit}
+
+className="
+mt-8
+grid
+gap-5
+"
+
+>
+
+
+
+
+<input
+
+className="field"
+
+placeholder="FULL NAME"
+
+value={name}
+
+onChange={
+e=>setName(e.target.value)
+}
+
+/>
+
+
+
+
+
+
+<input
+
+className="field"
+
+placeholder="EMAIL ADDRESS"
+
+type="email"
+
+value={email}
+
+onChange={
+e=>setEmail(e.target.value)
+}
+
+/>
+
+
+
+
+
+
+<input
+
+className="field"
+
+placeholder="PASSWORD"
+
+type="password"
+
+value={password}
+
+onChange={
+e=>setPassword(e.target.value)
+}
+
+/>
+
+
+
+
+
+
+{
+error &&
+
+<p className="
+text-red-400
+text-sm
+tracking-wide
+">
+
+{error}
+
+</p>
+
+}
+
+
+
+
+
+<button
+
+className="primary-button"
+
+disabled={loading}
+
+>
+
+
+{
+
+loading
+
+?
+
+'CREATING...'
+
+:
+
+'CREATE ACCOUNT'
+
+}
+
+
+</button>
+
+
+
+
+</form>
+
+
+
+
+
+
+
+<p className="
+mt-8
+text-sm
+text-gray-400
+">
+
+
+ALREADY REGISTERED?
+
+
+<Link
+
+to="/login"
+
+className="
+ml-2
+text-white
+uppercase
+tracking-[1px]
+"
+
+>
+
+SIGN IN
+
+</Link>
+
+
+
+</p>
+
+
+
+
+
+</section>
+
+
+
+</main>
+
+
+);
+
 }
