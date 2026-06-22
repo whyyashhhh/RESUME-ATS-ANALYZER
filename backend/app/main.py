@@ -14,7 +14,6 @@ from app import models  # noqa: F401
 from app.routers import analysis, auth, resume, chat
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
@@ -23,16 +22,10 @@ async def lifespan(app: FastAPI):
     yield
 
 
-
-
-
 app = FastAPI(
     title=settings.app_name,
     lifespan=lifespan
 )
-
-
-
 
 
 # Rate limit
@@ -43,20 +36,15 @@ app.add_middleware(
 
     limits={
 
-        '/api/register': (5, 60),
+        "/api/register": (5, 60),
 
-        '/api/login': (10, 60),
+        "/api/login": (10, 60),
 
-        '/api/upload-resume': (10, 60),
+        "/api/upload-resume": (10, 60),
 
     },
 
 )
-
-
-
-
-
 
 
 # CORS FIX
@@ -65,25 +53,11 @@ app.add_middleware(
 
     CORSMiddleware,
 
-
-    allow_origins=[
-
-        "http://localhost:5173",
-
-        "http://localhost:5175",
-
-        "http://localhost:5178",
-
-        "http://localhost:5181",
-
-    ],
-
+    allow_origins=settings.cors_origins,
 
     allow_credentials=True,
 
-
     allow_methods=["*"],
-
 
     allow_headers=["*"],
 
@@ -91,10 +65,7 @@ app.add_middleware(
 
 
 
-
-
-
-
+# Routers
 
 app.include_router(
 
@@ -105,7 +76,6 @@ app.include_router(
     tags=["auth"]
 
 )
-
 
 
 app.include_router(
@@ -119,7 +89,6 @@ app.include_router(
 )
 
 
-
 app.include_router(
 
     analysis.router,
@@ -129,7 +98,6 @@ app.include_router(
     tags=["analysis"]
 
 )
-
 
 
 app.include_router(
@@ -144,16 +112,11 @@ app.include_router(
 
 
 
-
-
-
-
 @app.get("/health")
-
 def health_check():
 
     return {
 
-        "status":"ok"
+        "status": "ok"
 
     }
