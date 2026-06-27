@@ -1,14 +1,13 @@
-import axios from "axios";
+﻿import axios from "axios";
 
 
 export const api = axios.create({
 
-  baseURL:"http://127.0.0.1:8000/api",
+  baseURL: "https://resume-ats-analyzer-2-gjo2.onrender.com/api",
 
-  withCredentials:false,
+  withCredentials: false,
 
 });
-
 
 
 api.interceptors.request.use((config)=>{
@@ -31,6 +30,7 @@ return config;
 });
 
 
+
 api.interceptors.response.use(
 
 (response)=>response,
@@ -39,7 +39,7 @@ api.interceptors.response.use(
 (error)=>{
 
 
-if(error.response?.status===401){
+if(error.response?.status === 401){
 
 
 localStorage.removeItem("access_token");
