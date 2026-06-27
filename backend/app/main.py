@@ -9,7 +9,7 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.database.base import Base
 from app.database.session import engine
 
-from app import models
+from app import models  # noqa: F401
 
 from app.routers import analysis, auth, resume, chat
 
@@ -21,7 +21,6 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
 
     yield
-
 
 
 
@@ -44,32 +43,29 @@ app.add_middleware(
 
         "/api/upload-resume": (10,60),
 
-    }
+    },
 
 )
 
 
 
+# CORS FIX
 
 app.add_middleware(
 
     CORSMiddleware,
 
-
     allow_origins=[
 
         "http://localhost:5173",
 
-        "http://127.0.0.1:5173"
+        "https://resume-ats-analyzer-pt6e.vercel.app"
 
     ],
 
-
     allow_credentials=True,
 
-
     allow_methods=["*"],
-
 
     allow_headers=["*"],
 
@@ -77,35 +73,51 @@ app.add_middleware(
 
 
 
-
-
 app.include_router(
+
     auth.router,
+
     prefix="/api",
+
     tags=["auth"]
+
 )
 
 
+
 app.include_router(
+
     resume.router,
+
     prefix="/api",
+
     tags=["resume"]
+
 )
 
 
+
 app.include_router(
+
     analysis.router,
+
     prefix="/api",
+
     tags=["analysis"]
+
 )
+
 
 
 app.include_router(
-    chat.router,
-    prefix="/api",
-    tags=["chat"]
-)
 
+    chat.router,
+
+    prefix="/api",
+
+    tags=["chat"]
+
+)
 
 
 
