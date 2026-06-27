@@ -1,110 +1,40 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {motion} from "framer-motion";
+import {UploadCloud, FileText, Sparkles} from "lucide-react";
 
-import { Sidebar } from '../components/Sidebar';
-import { api } from '../lib/api';
+import {HeroSection} from "../components/ui/hero-section-shadcnui";
+import AICopilot from "../components/AICopilot";
+import {api} from "../lib/api";
 
 
-
-export function DashboardPage() {
+export function DashboardPage(){
 
 
 const navigate = useNavigate();
 
 
+const [file,setFile]=useState<File|null>(null);
 
-const sessionId =
-localStorage.getItem("chat_session") ||
-(Date.now().toString());
+const [role,setRole]=useState("");
 
+const [jd,setJd]=useState("");
 
-
-localStorage.setItem(
-"chat_session",
-sessionId
-);
+const [loading,setLoading]=useState(false);
 
 
 
 
-
-const [chatFile,setChatFile] =
-useState<File | null>(null);
+async function analyze(){
 
 
+if(!file || !role || !jd){
 
-const [resumeId,setResumeId] =
-useState<number | null>(null);
-
-
-
-const [targetRole,setTargetRole] =
-useState("Software Engineer");
-
-
-
-const [message,setMessage] =
-useState("");
-
-
-
-const [loading,setLoading] =
-useState(false);
-
-
-
-const [error,setError] =
-useState("");
-
-
-
-const [chat,setChat] =
-useState<any[]>([
-
-{
-role:"ai",
-text:
-"Hi 👋 Upload your resume first. I will analyze it with your job description."
-}
-
-]);
-
-
-
-
-
-
-const logout=()=>{
-
-localStorage.clear();
-
-navigate("/login");
-
-};
-
-
-
-
-
-
-
-
-// STEP 1 - Upload resume
-
-const uploadResume = async()=>{
-
-
-if(!chatFile){
-
-setError(
-"Please upload resume"
-);
+alert("Please add role, job description and resume");
 
 return;
 
 }
-
-
 
 
 try{
@@ -114,44 +44,54 @@ setLoading(true);
 
 
 
-const formData =
-new FormData();
+const sessionId = crypto.randomUUID();
 
 
 
-formData.append(
+localStorage.setItem(
+"resume_session",
+sessionId
+);
+
+
+
+const form = new FormData();
+
+form.append(
 "file",
-chatFile
+file
 );
 
 
 
 
+const upload = await api.post(
 
-const response =
-await api.post(
+`/upload-resume?session_id=${sessionId}&target_role=${role}`,
 
-"/upload-resume",
+form
 
-formData,
+);
+
+
+
+const resumeId =
+upload.data.resume.id;
+
+
+
+
+const analysis = await api.post(
+
+"/analyze-resume",
 
 {
 
-params:{
+resume_id:resumeId,
 
-session_id:sessionId,
+job_description:jd,
 
-target_role:targetRole
-
-},
-
-
-headers:{
-
-"Content-Type":
-"multipart/form-data"
-
-}
+target_role:role
 
 }
 
@@ -159,34 +99,12 @@ headers:{
 
 
 
+navigate(
 
+`/analysis/${analysis.data.id}`
 
-setResumeId(
-response.data.resume.id
 );
 
-
-
-
-
-setChat(prev=>[
-
-...prev,
-
-
-{
-role:"user",
-text:"Resume uploaded 📄"
-},
-
-
-{
-role:"ai",
-text:
-"Resume received ✅ Now paste your job description."
-}
-
-]);
 
 
 }
@@ -195,13 +113,11 @@ catch(err:any){
 
 
 console.log(
-err?.response?.data
+err.response?.data
 );
 
 
-setError(
-"Resume upload failed"
-);
+alert("Analysis failed");
 
 
 }
@@ -215,287 +131,208 @@ setLoading(false);
 }
 
 
-
-};
-
-
-
-
-
-
-
-
-
-
-
-// STEP 2 - JD + Analysis
-
-const sendMessage = async()=>{
-
-
-if(!message.trim())
-return;
-
-
-
-if(!resumeId){
-
-
-setChat(prev=>[
-
-...prev,
-
-
-{
-role:"ai",
-text:
-"Please upload resume first 📄"
-}
-
-]);
-
-
-return;
-
 }
 
 
 
 
-const jd = message;
 
+return(
 
 
-setChat(prev=>[
-
-...prev,
-
-
-{
-role:"user",
-text:jd
-},
-
-
-{
-role:"ai",
-text:
-"Analyzing your resume... ⏳"
-}
-
-
-]);
-
-
-
-setMessage("");
-
-
-
-
-
-try{
-
-
-const response =
-await api.post(
-
-"/analyze-resume",
-
-{
-
-resume_id:resumeId,
-
-job_description:jd,
-
-target_role:targetRole
-
-}
-
-);
-
-
-
-
-
-
-setChat(prev=>[
-
-...prev,
-
-
-{
-role:"ai",
-text:
-"Analysis completed ✅ Opening report..."
-}
-
-]);
-
-
-
-
-
-setTimeout(()=>{
-
-
-navigate(
-`/analysis/${response.data.id}`
-);
-
-
-},1000);
-
-
-
-
-}
-
-catch(err:any){
-
-
-console.log(
-"ANALYSIS ERROR",
-err?.response?.data
-);
-
-
-
-setChat(prev=>[
-
-...prev,
-
-
-{
-role:"ai",
-text:
-"Analysis failed ❌"
-}
-
-]);
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-
-
-return (
-
-
-<main className="
-page-enter
+<div className="
 min-h-screen
-bg-black
+bg-[#080808]
 text-white
-grid
-lg:grid-cols-[280px_1fr]
-gap-6
-p-6
 ">
 
 
-
-<Sidebar onLogout={logout}/>
-
-
-
-
-
-<section className="space-y-6">
-
-
-
-
-
-<header className="
-animate-item
-border
-border-[#262626]
-bg-[#0d0d0d]
-p-8
-">
-
-
-<p className="
-text-xs
-tracking-[2px]
-text-gray-500
-">
-
-AI RESUME COPILOT
-
-</p>
-
-
-<h1 className="
-text-5xl
-font-bold
-uppercase
-mt-4
-">
-
-Resume Intelligence
-
-</h1>
-
-
-</header>
-
-
-
-
-
+<HeroSection/>
 
 
 
 
 <section className="
-animate-item
-border
-border-[#262626]
-bg-[#0d0d0d]
-p-8
+max-w-5xl
+mx-auto
+px-6
+pb-20
 ">
+
+
+
+<motion.div
+
+initial={{opacity:0,y:40}}
+
+animate={{opacity:1,y:0}}
+
+className="
+rounded-3xl
+border
+border-white/10
+bg-white/5
+p-10
+backdrop-blur-xl
+"
+
+
+>
+
+
+<div className="
+w-20
+h-20
+rounded-3xl
+mx-auto
+bg-gradient-to-br
+from-blue-500
+to-red-500
+flex
+items-center
+justify-center
+">
+
+
+<UploadCloud size={40}/>
+
+
+</div>
+
+
 
 
 
 <h2 className="
-text-2xl
-font-bold
-uppercase
+mt-8
+text-4xl
+font-black
+text-center
 ">
 
-AI CHAT ASSISTANT
+AI Resume Analyzer
 
 </h2>
 
 
 
 
-<label className="
-inline-block
-mt-5
+<p className="
+mt-3
+text-center
+text-white/50
+">
+
+Add role, JD and analyze your resume with AI.
+
+</p>
+
+
+
+
+
+<input
+
+className="
+mt-8
+w-full
+bg-black/40
 border
-border-[#262626]
+border-white/20
+rounded-xl
 px-5
-py-3
+py-4
+outline-none
+"
+
+placeholder="Target Role"
+
+value={role}
+
+onChange={(e)=>setRole(e.target.value)}
+
+/>
+
+
+
+
+
+<textarea
+
+className="
+mt-5
+w-full
+h-40
+bg-black/40
+border
+border-white/20
+rounded-xl
+px-5
+py-4
+outline-none
+"
+
+placeholder="Paste Job Description"
+
+value={jd}
+
+onChange={(e)=>setJd(e.target.value)}
+
+ />
+
+
+
+
+
+
+
+<label className="
+mt-6
+block
+h-32
+rounded-3xl
+border
+border-dashed
+border-white/20
+bg-black/30
+flex
+flex-col
+items-center
+justify-center
 cursor-pointer
-uppercase
-text-sm
+hover:border-blue-400
+transition
 ">
 
 
-Upload Resume
+<FileText
+
+className="text-blue-400"
+
+size={35}
+
+/>
+
+
+
+<p className="mt-3 font-semibold">
+
+{
+
+file
+
+?
+
+file.name
+
+:
+
+"Choose Resume PDF"
+
+}
+
+</p>
+
 
 
 <input
@@ -504,17 +341,18 @@ hidden
 
 type="file"
 
-accept=".pdf,.docx"
+accept=".pdf"
 
-onChange={
-e=>
-setChatFile(
+onChange={(e)=>
+
+setFile(
 e.target.files?.[0] || null
 )
+
 }
 
-
 />
+
 
 
 </label>
@@ -522,118 +360,74 @@ e.target.files?.[0] || null
 
 
 
-<button
-
-className="primary-button mt-5"
-
-onClick={uploadResume}
-
-disabled={loading}
-
->
-
-UPLOAD
-
-
-</button>
 
 
 
+<motion.button
 
+whileHover={{
+scale:1.05
+}}
 
+whileTap={{
+scale:.95
+}}
 
-<div className="
+onClick={analyze}
+
+className="
 mt-8
-space-y-4
-">
+mx-auto
+px-12
+py-4
+rounded-full
+font-bold
+bg-gradient-to-r
+from-blue-500
+via-purple-500
+to-red-500
+flex
+gap-2
+items-center
+"
+
+>
+
+
+
+<Sparkles size={18}/>
 
 
 {
 
-chat.map((item,index)=>(
+loading
 
-
-<div
-
-key={index}
-
-className={
-item.role==="ai"
 ?
-"chat-ai"
+
+"Analyzing..."
+
 :
-"chat-user"
-}
 
->
-
-{item.text}
-
-</div>
-
-
-))
+"Analyze Resume"
 
 }
 
 
-</div>
+
+</motion.button>
+
+
+
+
+</motion.div>
 
 
 
 
 
+<AICopilot/>
 
 
-<input
-
-className="field mt-6"
-
-placeholder="Paste Job Description..."
-
-value={message}
-
-onChange={
-e=>setMessage(e.target.value)
-}
-
-
-/>
-
-
-
-
-
-<button
-
-className="primary-button mt-4"
-
-onClick={sendMessage}
-
-disabled={loading}
-
->
-
-SEND
-
-
-</button>
-
-
-
-
-
-{
-
-error &&
-
-<p className="text-red-400 mt-4">
-
-{error}
-
-</p>
-
-}
 
 
 
@@ -642,13 +436,11 @@ error &&
 
 
 
-</section>
+
+</div>
 
 
-</main>
-
-
-);
+)
 
 
 }

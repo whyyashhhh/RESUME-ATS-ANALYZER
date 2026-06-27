@@ -1,109 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-
-import { api } from '../lib/api';
-
-
-type AnalysisResponse = {
-
-  id:number;
-
-  ats_score:number;
-
-  keyword_score:number;
-
-  analysis_json:{
-
-    insights?:{
-
-      resume_summary?:string;
-
-      strengths?:string[];
-
-      weaknesses?:string[];
-
-      missing_keywords?:string[];
-
-      ats_optimization_suggestions?:string[];
-
-      cover_letter_suggestions?:string[];
-
-      interview_questions?:Record<string,string[]>;
-
-    };
-
-    score_breakdown?:Record<string,number>;
-
-  };
-
-};
-
-
+import {useEffect,useState} from "react";
+import {useParams} from "react-router-dom";
+import {motion} from "framer-motion";
+import {api} from "../lib/api";
 
 
 export function AnalysisResultsPage(){
 
 
-const {id} = useParams();
+const {id}=useParams();
 
-
-const [analysis,setAnalysis] =
-useState<AnalysisResponse|null>(null);
-
-
-const [loading,setLoading] =
-useState(true);
-
-
-const [error,setError] =
-useState('');
-
-
+const [data,setData]=useState<any>(null);
 
 
 
 useEffect(()=>{
 
 
-const load = async()=>{
+api.get(`/analysis/${id}`)
 
+.then(res=>{
 
-try{
+setData(res.data)
 
-
-const res =
-await api.get(`/analysis/${id}`);
-
-
-setAnalysis(res.data);
-
-
-}
-
-catch{
-
-
-setError(
-"Unable to load analysis"
-);
-
-
-}
-
-finally{
-
-
-setLoading(false);
-
-
-}
-
-
-};
-
-
-
-load();
+})
 
 
 },[id]);
@@ -111,107 +30,130 @@ load();
 
 
 
+if(!data){
 
-
-if(loading){
-
-return (
-
-<div className="
-min-h-screen
-bg-black
-text-white
-p-10
-">
-
-Loading analysis...
-
+return <div className="bg-black min-h-screen text-white p-10">
+Loading...
 </div>
-
-);
 
 }
 
 
 
 
+const a=data.analysis_json.insights || data.analysis_json;
 
 
-if(error){
 
-return (
+const Section=({title,items}:any)=>(
 
 <div className="
-min-h-screen
-bg-black
-text-red-400
-p-10
-">
-
-{error}
-
-</div>
-
-);
-
-}
-
-
-
-
-
-
-
-const insights =
-analysis?.analysis_json.insights;
-
-
-
-return (
-
-<main className="
-page-enter
-min-h-screen
-bg-black
-text-white
-p-6
-">
-
-
-<section className="
+bg-white/5
 border
-border-[#262626]
-bg-[#0d0d0d]
+border-white/10
+rounded-3xl
 p-8
-max-w-7xl
+">
+
+
+<h2 className="
+text-3xl
+font-bold
+mb-5
+">
+
+{title}
+
+</h2>
+
+
+<ul className="
+space-y-3
+text-white/70
+">
+
+
+{
+
+Array.isArray(items)
+
+?
+
+items.map((x:string,i:number)=>(
+
+<li key={i}>
+• {x}
+</li>
+
+))
+
+:
+
+Object.values(items || {}).flat().map((x:any,i:number)=>(
+
+<li key={i}>
+• {x}
+</li>
+
+))
+
+}
+
+
+
+</ul>
+
+
+</div>
+
+
+);
+
+
+
+
+
+
+return(
+
+
+<div className="
+min-h-screen
+bg-[#080808]
+text-white
+px-6
+py-20
+">
+
+
+<motion.div
+
+initial={{opacity:0,y:30}}
+
+animate={{opacity:1,y:0}}
+
+className="
+max-w-6xl
 mx-auto
-">
+"
 
 
-
-<p className="
-text-xs
-tracking-[2px]
-text-gray-500
-">
-
-AI ANALYSIS REPORT
-
-</p>
-
+>
 
 
 <h1 className="
-text-5xl
-font-bold
-uppercase
-mt-5
+text-6xl
+font-black
+bg-gradient-to-r
+from-blue-400
+to-red-500
+text-transparent
+bg-clip-text
 ">
 
-Resume Score
+AI Resume Analysis
 
 </h1>
-
 
 
 
@@ -225,31 +167,52 @@ mt-10
 
 
 <div className="
-border
-border-[#262626]
+bg-white/5
+rounded-3xl
 p-8
+border
+border-white/10
 ">
 
-<p className="
-text-gray-500
-uppercase
-text-xs
-">
 
-ATS SCORE
+<h2 className="text-5xl font-black">
 
+{data.ats_score}%
+
+</h2>
+
+
+<p className="text-white/50">
+ATS Score
 </p>
 
 
-<h2 className="
-text-6xl
-font-bold
-mt-4
+</div>
+
+
+
+<div className="
+bg-white/5
+rounded-3xl
+p-8
+border
+border-white/10
 ">
 
-{analysis?.ats_score}
+
+<h2 className="text-5xl font-black">
+
+{data.keyword_score}%
 
 </h2>
+
+
+<p className="text-white/50">
+Keyword Match
+</p>
+
+
+</div>
 
 
 </div>
@@ -259,210 +222,69 @@ mt-4
 
 
 <div className="
-border
-border-[#262626]
-p-8
-">
-
-<p className="
-text-gray-500
-uppercase
-text-xs
-">
-
-KEYWORD MATCH
-
-</p>
-
-
-<h2 className="
-text-6xl
-font-bold
-mt-4
-">
-
-{analysis?.keyword_score}%
-
-</h2>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div className="
-mt-8
-grid
-gap-6
+mt-10
+space-y-6
 ">
 
 
+<Section
 
-<section className="
-border
-border-[#262626]
-p-6
-">
+title="Resume Summary"
 
+items={[a.resume_summary]}
 
-<h2 className="
-text-2xl
-font-bold
-uppercase
-">
+/>
 
-Summary
 
-</h2>
 
+<Section
 
-<p className="
-mt-4
-text-gray-400
-">
+title="Strengths"
 
-{insights?.resume_summary}
+items={a.strengths}
 
-</p>
+/>
 
 
-</section>
 
 
+<Section
 
+title="Weaknesses"
 
+items={a.weaknesses}
 
+/>
 
-<section className="
-border
-border-[#262626]
-p-6
-">
 
 
-<h2 className="
-text-2xl
-font-bold
-uppercase
-">
+<Section
 
-Strengths
+title="Recommendations"
 
-</h2>
+items={a.ats_optimization_suggestions}
 
+/>
 
 
-<ul className="
-mt-4
-space-y-3
-">
 
+<Section
 
-{
+title="Resume Improvements"
 
-(insights?.strengths ?? []).map(item=>(
+items={a.resume_rewrite_suggestions}
 
+/>
 
-<li
 
-key={item}
 
-className="
-border
-border-[#262626]
-p-4
-text-gray-300
-"
+<Section
 
->
+title="Interview Questions"
 
-{item}
+items={a.interview_questions}
 
-</li>
-
-
-))
-
-}
-
-
-</ul>
-
-
-</section>
-
-
-
-
-
-
-
-
-<section className="
-border
-border-[#262626]
-p-6
-">
-
-
-<h2 className="
-text-2xl
-font-bold
-uppercase
-">
-
-Improvements
-
-</h2>
-
-
-
-<ul className="
-mt-4
-space-y-3
-">
-
-
-{
-
-(insights?.ats_optimization_suggestions ?? []).map(item=>(
-
-
-<li
-
-key={item}
-
-className="
-border
-border-[#262626]
-p-4
-text-gray-300
-"
-
->
-
-{item}
-
-</li>
-
-
-))
-
-}
-
-
-</ul>
-
-
-</section>
-
+/>
 
 
 
@@ -470,15 +292,12 @@ text-gray-300
 
 
 
+</motion.div>
 
 
-</section>
+</div>
 
 
-</main>
-
-
-);
-
+)
 
 }
