@@ -1,192 +1,223 @@
 from app.services.gemini_service import client
 
 
+
 class ChatSession:
+
     def __init__(self):
-        self.messages = []
-        self.resume_text = None
-        self.job_description = None
+
+        self.messages=[]
+
+        self.resume_text=None
+
+        self.job_description=None
+
+        self.target_role=None
+
+        self.step="role"
 
 
-sessions = {}
+
+sessions={}
 
 
-def get_session(session_id: str):
+
+
+
+def get_session(session_id:str):
+
     if session_id not in sessions:
-        sessions[session_id] = ChatSession()
+
+        sessions[session_id]=ChatSession()
+
+
     return sessions[session_id]
 
 
-def handle_chat(session_id: str, user_message: str):
 
-    session = get_session(session_id)
 
-    # Resume check
-    if not session.resume_text:
+
+
+
+def handle_chat(session_id:str,user_message:str):
+
+
+    session=get_session(session_id)
+
+
+
+    msg=user_message.strip()
+
+
+
+    # STEP 1 ROLE
+
+
+    if session.step=="role":
+
+
+        session.target_role=msg
+
+
+        session.step="jd"
+
+
+
         return {
-            "response": "Please upload your resume first.",
-            "session_id": session_id
+
+        "response":
+        "Great ?? Now paste the Job Description for this role.",
+
+        "session_id":session_id
+
         }
 
-    # Save Job Description
-    if user_message.lower().startswith("job description:"):
 
-        session.job_description = (
-            user_message.replace("Job Description:", "")
-            .strip()
-        )
+
+
+
+
+    # STEP 2 JD
+
+
+    if session.step=="jd":
+
+
+        session.job_description=msg
+
+
+        session.step="resume"
+
+
 
         return {
+
+        "response":
+        "Perfect ? Now upload your resume PDF.",
+
+        "session_id":session_id
+
+        }
+
+
+
+
+
+
+
+    # STEP 3 WAIT RESUME
+
+
+    if session.step=="resume":
+
+
+        if not session.resume_text:
+
+
+            return {
+
+
             "response":
-            "✅ Job Description saved successfully.\n\n"
-            "Now you can ask:\n"
-            "- ATS Analysis\n"
-            "- Generate Cover Letter\n"
-            "- Generate Interview Questions",
-            "session_id": session_id
-        }
+            "Please upload your resume first.",
 
-    # ATS Analysis
-    if user_message.lower() == "ats analysis":
+            "session_id":session_id
 
-        if not session.job_description:
-            return {
-                "response": "Please provide Job Description first.",
-                "session_id": session_id
             }
 
-        prompt = f"""
-You are an expert ATS Resume Analyzer.
 
-Resume:
-{session.resume_text}
 
-Job Description:
-{session.job_description}
 
-Provide:
 
-1. ATS Score (0-100)
-2. Resume Match Percentage
-3. Missing Keywords
-4. Strengths
-5. Weaknesses
-6. Skills to Add
-7. Resume Improvements
-8. Interview Questions
-9. Hiring Recommendation
 
-Format professionally.
-"""
 
-        response = client.models.generate_content(
-            model="models/gemini-2.5-flash",
-            contents=prompt
-        )
 
-        return {
-            "response": response.text,
-            "session_id": session_id
-        }
+    # NORMAL AI CHAT
 
-    # Cover Letter
-    if user_message.lower() == "generate cover letter":
 
-        if not session.job_description:
-            return {
-                "response": "Please provide Job Description first.",
-                "session_id": session_id
-            }
-
-        prompt = f"""
-Create a professional cover letter.
-
-Resume:
-{session.resume_text}
-
-Job Description:
-{session.job_description}
-"""
-
-        response = client.models.generate_content(
-            model="models/gemini-2.5-flash",
-            contents=prompt
-        )
-
-        return {
-            "response": response.text,
-            "session_id": session_id
-        }
-
-    # Interview Questions
-    if user_message.lower() == "generate interview questions":
-
-        if not session.job_description:
-            return {
-                "response": "Please provide Job Description first.",
-                "session_id": session_id
-            }
-
-        prompt = f"""
-Generate 20 interview questions.
-
-Resume:
-{session.resume_text}
-
-Job Description:
-{session.job_description}
-
-Include:
-- Technical Questions
-- HR Questions
-- Project Questions
-- Scenario Based Questions
-"""
-
-        response = client.models.generate_content(
-            model="models/gemini-2.5-flash",
-            contents=prompt
-        )
-
-        return {
-            "response": response.text,
-            "session_id": session_id
-        }
-
-    # Normal Chat
     session.messages.append({
-        "role": "user",
-        "content": user_message
+
+        "role":"user",
+
+        "content":msg
+
     })
 
-    prompt = f"""
+
+
+
+
+    prompt=f"""
+
 You are an AI Resume Copilot.
 
-Resume:
-{session.resume_text}
+
+Target Role:
+
+{session.target_role}
+
+
 
 Job Description:
+
 {session.job_description}
 
+
+
+Resume:
+
+{session.resume_text}
+
+
+
 Conversation:
+
 {session.messages}
 
-Answer like ChatGPT.
+
+
+Help the user with:
+
+- ATS improvement
+- Resume suggestions
+- Interview preparation
+- Career advice
+
+
 """
 
-    response = client.models.generate_content(
+
+
+    response=client.models.generate_content(
+
         model="models/gemini-2.5-flash",
+
         contents=prompt
+
     )
 
-    ai_text = response.text
+
+
+
+    ai=response.text
+
+
 
     session.messages.append({
-        "role": "assistant",
-        "content": ai_text
+
+        "role":"assistant",
+
+        "content":ai
+
     })
 
+
+
     return {
-        "response": ai_text,
-        "session_id": session_id
+
+
+    "response":ai,
+
+    "session_id":session_id
+
+
     }

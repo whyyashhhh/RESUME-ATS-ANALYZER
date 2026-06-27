@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+﻿from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,9 +9,10 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.database.base import Base
 from app.database.session import engine
 
-from app import models  # noqa: F401
+from app import models
 
 from app.routers import analysis, auth, resume, chat
+
 
 
 @asynccontextmanager
@@ -22,13 +23,14 @@ async def lifespan(app: FastAPI):
     yield
 
 
+
+
 app = FastAPI(
     title=settings.app_name,
     lifespan=lifespan
 )
 
 
-# Rate limit
 
 app.add_middleware(
 
@@ -36,28 +38,38 @@ app.add_middleware(
 
     limits={
 
-        "/api/register": (5, 60),
+        "/api/register": (5,60),
 
-        "/api/login": (10, 60),
+        "/api/login": (10,60),
 
-        "/api/upload-resume": (10, 60),
+        "/api/upload-resume": (10,60),
 
-    },
+    }
 
 )
 
 
-# CORS FIX
+
 
 app.add_middleware(
 
     CORSMiddleware,
 
-    allow_origins=settings.cors_origins,
+
+    allow_origins=[
+
+        "http://localhost:5173",
+
+        "http://127.0.0.1:5173"
+
+    ],
+
 
     allow_credentials=True,
 
+
     allow_methods=["*"],
+
 
     allow_headers=["*"],
 
@@ -65,50 +77,35 @@ app.add_middleware(
 
 
 
-# Routers
+
 
 app.include_router(
-
     auth.router,
-
     prefix="/api",
-
     tags=["auth"]
-
 )
 
 
 app.include_router(
-
     resume.router,
-
     prefix="/api",
-
     tags=["resume"]
-
 )
 
 
 app.include_router(
-
     analysis.router,
-
     prefix="/api",
-
     tags=["analysis"]
-
 )
 
 
 app.include_router(
-
     chat.router,
-
     prefix="/api",
-
     tags=["chat"]
-
 )
+
 
 
 
@@ -117,6 +114,6 @@ def health_check():
 
     return {
 
-        "status": "ok"
+        "status":"ok"
 
     }
