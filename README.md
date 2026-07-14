@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # AI Resume Analyzer & ATS Optimizer
 
 Full-stack starter for a production-grade resume analysis platform.
@@ -69,6 +68,3 @@ Full-stack starter for a production-grade resume analysis platform.
 ## Current status
 
 This repository is now bootstrapped as a working starter with backend routes, frontend flows, Docker support, and a polished UI shell.
-=======
-# RESUME-ATS-ANALYZER
->>>>>>> d50136c45b30106ff91e91f2914e45bb2ced952c

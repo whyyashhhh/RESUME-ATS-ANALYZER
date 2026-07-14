@@ -2,6 +2,7 @@ from app.services.chat_service import get_session
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 from app.database.session import get_db
 from app.models.analysis import Analysis
@@ -18,7 +19,7 @@ router = APIRouter()
 @router.post('/upload-resume', response_model=ResumeUploadResponse, status_code=status.HTTP_201_CREATED)
 def upload_resume(
     file: UploadFile = File(...),
-    session_id: str = Query(...),
+    session_id: str | None = Query(default=None),
     target_role: str | None = Query(default=None, max_length=120),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -32,7 +33,8 @@ def upload_resume(
             detail=str(exc)
         ) from exc
 
-    session = get_session(session_id)
+    normalized_session_id = (session_id or '').strip() or f'{current_user.id}-{uuid4().hex}'
+    session = get_session(normalized_session_id)
     session.resume_text = cleaned_text
 
     resume = Resume(

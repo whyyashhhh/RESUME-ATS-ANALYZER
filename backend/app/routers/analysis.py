@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
@@ -9,6 +10,8 @@ from app.models.resume import Resume
 from app.models.user import User
 from app.schemas.analysis import (
     AnalyzeResumeRequest,
+    AnalysisHistoryItem,
+    AnalysisHistoryResponse,
     AnalysisRead,
     GenerateCoverLetterRequest,
     GenerateInterviewQuestionsRequest,
@@ -21,6 +24,35 @@ router = APIRouter()
 
 def to_analysis_read(analysis: Analysis) -> AnalysisRead:
     return AnalysisRead.model_validate(analysis)
+
+
+@router.get('/analysis-history', response_model=AnalysisHistoryResponse)
+def get_analysis_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AnalysisHistoryResponse:
+    stmt = (
+        select(Analysis, Resume.file_name)
+        .join(Resume, Resume.id == Analysis.resume_id)
+        .where(Analysis.user_id == current_user.id)
+        .order_by(Analysis.created_at.desc())
+    )
+    rows = db.execute(stmt).all()
+
+    items = [
+        AnalysisHistoryItem(
+            id=analysis.id,
+            resume_id=analysis.resume_id,
+            file_name=file_name,
+            target_role=analysis.target_role,
+            ats_score=analysis.ats_score,
+            keyword_score=analysis.keyword_score,
+            created_at=analysis.created_at,
+        )
+        for analysis, file_name in rows
+    ]
+
+    return AnalysisHistoryResponse(items=items, total=len(items))
 
 
 @router.post('/analyze-resume', response_model=AnalysisRead, status_code=status.HTTP_201_CREATED)

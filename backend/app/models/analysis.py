@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,7 +17,7 @@ class Analysis(Base):
     ats_score: Mapped[float] = mapped_column(Float, nullable=False)
     keyword_score: Mapped[float] = mapped_column(Float, nullable=False)
     analysis_json: Mapped[dict] = mapped_column(JSON, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
     user: Mapped['User'] = relationship(back_populates='analyses')
     resume: Mapped['Resume'] = relationship(back_populates='analyses')

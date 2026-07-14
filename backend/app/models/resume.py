@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -16,7 +16,7 @@ class Resume(Base):
     file_type: Mapped[str] = mapped_column(String(20), nullable=False)
     extracted_text: Mapped[str] = mapped_column(Text, nullable=False, default='')
     target_role: Mapped[str] = mapped_column(String(120), nullable=True)
-    upload_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    upload_date: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
     user: Mapped['User'] = relationship(back_populates='resumes')
     analyses: Mapped[list['Analysis']] = relationship(back_populates='resume', cascade='all, delete-orphan')

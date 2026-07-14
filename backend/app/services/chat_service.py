@@ -1,4 +1,4 @@
-from app.services.gemini_service import client
+from app.services.gemini_service import get_client
 
 
 
@@ -187,18 +187,21 @@ Help the user with:
 
 
 
-    response=client.models.generate_content(
+    try:
 
-        model="models/gemini-2.5-flash",
+        response=get_client().models.generate_content(
 
-        contents=prompt
+            model="models/gemini-2.5-flash",
 
-    )
+            contents=prompt
 
+        )
 
+        ai=response.text
 
+    except Exception:
 
-    ai=response.text
+        ai="AI copilot is temporarily unavailable. Please try again shortly."
 
 
 
