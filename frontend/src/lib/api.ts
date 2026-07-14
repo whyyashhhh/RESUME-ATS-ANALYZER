@@ -1,9 +1,14 @@
 ﻿import axios from "axios";
 
 
+const envBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+const isLocalHost = typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const defaultBaseUrl = isLocalHost ? "http://localhost:8000/api" : "/api";
+
+
 export const api = axios.create({
 
-  baseURL: "https://resume-ats-analyzer-2-gjo2.onrender.com/api",
+  baseURL: envBaseUrl || defaultBaseUrl,
 
   withCredentials: false,
 
