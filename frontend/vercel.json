@@ -1,6 +1,10 @@
 ﻿{
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://resume-ats-analyzer-2-gjo2.onrender.com/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
